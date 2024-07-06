@@ -49,7 +49,7 @@ void drawRays(int rays) {
 
         // Upwards
         if (ra > PI) {
-            ry = playerY - 0.0001;
+            ry = ((int)playerY >> 6 << 6) - 0.0001;
             rx = (playerY - ry) * atan + playerX;
 
             yoff = -tileSize;
@@ -57,7 +57,7 @@ void drawRays(int rays) {
         }
         // Downwards
         if (ra < PI) {
-            ry = playerY + tileSize;
+            ry = ((int)playerY >> 6 << 6) + tileSize;
             rx = (playerY - ry) * atan + playerX;
 
             yoff = tileSize;
@@ -99,7 +99,7 @@ void drawRays(int rays) {
 
         // Left
         if (ra > P2 && ra < P3) {
-            rx = playerX - 0.0001;
+            rx = ((int)playerX >> 6 << 6) - 0.0001;
             ry = (playerX - rx) * ntan + playerY;
 
             xoff = -tileSize;
@@ -107,7 +107,7 @@ void drawRays(int rays) {
         }
         // Right
         if (ra < P2 || ra > P3) {
-            rx = playerX + tileSize;
+            rx = ((int)playerX >> 6 << 6) + tileSize;
             ry = (playerX - rx) * ntan + playerY;
 
             xoff = tileSize;
