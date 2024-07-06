@@ -7,6 +7,8 @@
 
 #define screenWidth 1024
 #define screenHeight 512
+#define viewHeight 320
+#define wallWidth 8
 #define mapWidth 8
 #define mapHeight 8
 #define mapSize 64
@@ -16,7 +18,7 @@ int worldMap[mapSize] =
     {1, 1, 1, 1, 1, 1, 1, 1,
      1, 0, 1, 0, 0, 0, 0, 1,
      1, 0, 1, 0, 0, 1, 0, 1,
-     1, 0, 1, 0, 0, 1, 0, 1,
+     1, 0, 1, 0, 0, 0, 0, 1,
      1, 0, 0, 0, 0, 0, 0, 1,
      1, 0, 0, 0, 0, 1, 0, 1,
      1, 0, 0, 0, 0, 0, 0, 1,
@@ -164,6 +166,28 @@ void drawRays(int rays) {
         glVertex2i(rx, ry);
         glEnd();
 
+        // Draw 3d walls
+        float ca = pAngle - ra;
+        if (ca < 0) {
+            ca += 2 * PI;
+        }
+        if (ca > 2 * PI) {
+            ca -= 2 * PI;
+        }
+        wallDist = wallDist * cos(ca); // Handle fisheye effect
+
+        float lineHeight = tileSize * viewHeight / wallDist;
+        if (lineHeight > viewHeight) {
+            lineHeight = viewHeight;
+        }
+        float lineOff = viewHeight / 2 - lineHeight / 2;
+
+        glLineWidth(wallWidth);
+        glBegin(GL_LINES);
+        glVertex2i(r * wallWidth + screenWidth / 2 + 40, lineOff);
+        glVertex2i(r * wallWidth + screenWidth / 2 + 40, lineHeight + lineOff);
+        glEnd();
+
         // Increment degree
         ra += DEG_RAD;
         if (ra < 0) {
@@ -222,7 +246,7 @@ void drawMap() {
 void display() {
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
     drawMap();
-    drawRays(66);
+    drawRays(60);
     drawPlayer();
     glutSwapBuffers();
 }
