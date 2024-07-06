@@ -3,9 +3,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 
-#define PI 3.1415926535
-#define P2 PI / 2
-#define P3 3 * PI / 2
+#include "trig.h"
 
 #define screenWidth 1024
 #define screenHeight 512
@@ -35,8 +33,15 @@ float euclidean(float x1, float y1, float x2, float y2) {
 void drawRays(int rays) {
     int mx, my, mp, dof;
     float rx, ry, ra, xoff, yoff;
+    float wallDist;
 
-    ra = pAngle;
+    ra = pAngle - DEG_RAD * rays / 2;
+    if (ra < 0) {
+        ra += 2 * PI;
+    }
+    if (ra > 2 * PI) {
+        ra -= 2 * PI;
+    }
 
     for (int r = 0; r < rays; r++) {
         float sideDistY = INT_MAX;
@@ -143,10 +148,12 @@ void drawRays(int rays) {
         if (sideDistX < sideDistY) {
             rx = xRayX;
             ry = xRayY;
+            wallDist = sideDistX;
         }
         if (sideDistY < sideDistX) {
             rx = yRayX;
             ry = yRayY;
+            wallDist = sideDistY;
         }
 
         // Draw ray
@@ -156,6 +163,15 @@ void drawRays(int rays) {
         glVertex2i(playerX, playerY);
         glVertex2i(rx, ry);
         glEnd();
+
+        // Increment degree
+        ra += DEG_RAD;
+        if (ra < 0) {
+            ra += 2 * PI;
+        }
+        if (ra > 2 * PI) {
+            ra -= 2 * PI;
+        }
     }
 }
 
@@ -206,8 +222,8 @@ void drawMap() {
 void display() {
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
     drawMap();
+    drawRays(66);
     drawPlayer();
-    drawRays(1);
     glutSwapBuffers();
 }
 
