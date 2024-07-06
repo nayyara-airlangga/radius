@@ -7,7 +7,7 @@
 
 #define screenWidth 1024
 #define screenHeight 512
-#define viewHeight 320
+#define viewHeight 340
 #define wallWidth 8
 #define mapWidth 8
 #define mapHeight 8
@@ -16,8 +16,8 @@
 
 int worldMap[mapSize] =
     {1, 1, 1, 1, 1, 1, 1, 1,
-     1, 0, 1, 0, 0, 0, 0, 1,
-     1, 0, 1, 0, 0, 1, 0, 1,
+     1, 0, 1, 0, 0, 1, 1, 1,
+     1, 0, 1, 0, 0, 0, 1, 1,
      1, 0, 1, 0, 0, 0, 0, 1,
      1, 0, 0, 0, 0, 0, 0, 1,
      1, 0, 0, 0, 0, 1, 0, 1,
@@ -84,7 +84,7 @@ void drawRays(int rays) {
             mp = my * mapWidth + mx;
 
             // Check if hit wall
-            if (mp > 0 && mp < mapHeight * mapWidth && worldMap[mp] == 1) {
+            if (mp > 0 && mp < mapHeight * mapWidth && worldMap[mp] > 0) {
                 yRayX = rx;
                 yRayY = ry;
                 sideDistY = euclidean(playerX, playerY, yRayX, yRayY);
@@ -134,7 +134,7 @@ void drawRays(int rays) {
             mp = my * mapWidth + mx;
 
             // Check if hit wall
-            if (mp > 0 && mp < mapHeight * mapWidth && worldMap[mp] == 1) {
+            if (mp > 0 && mp < mapHeight * mapWidth && worldMap[mp] > 0) {
                 xRayX = rx;
                 xRayY = ry;
                 sideDistX = euclidean(playerX, playerY, xRayX, xRayY);
@@ -151,15 +151,16 @@ void drawRays(int rays) {
             rx = xRayX;
             ry = xRayY;
             wallDist = sideDistX;
+            glColor3f(0.9, 0, 0);
         }
         if (sideDistY < sideDistX) {
             rx = yRayX;
             ry = yRayY;
             wallDist = sideDistY;
+            glColor3f(0.7, 0, 0);
         }
 
         // Draw ray
-        glColor3f(1, 0, 0);
         glLineWidth(1);
         glBegin(GL_LINES);
         glVertex2i(playerX, playerY);
@@ -174,6 +175,8 @@ void drawRays(int rays) {
         if (ca > 2 * PI) {
             ca -= 2 * PI;
         }
+
+        // For reference, see orthogonal projection vector length
         wallDist = wallDist * cos(ca); // Handle fisheye effect
 
         float lineHeight = tileSize * viewHeight / wallDist;
@@ -184,8 +187,8 @@ void drawRays(int rays) {
 
         glLineWidth(wallWidth);
         glBegin(GL_LINES);
-        glVertex2i(r * wallWidth + screenWidth / 2 + 40, lineOff);
-        glVertex2i(r * wallWidth + screenWidth / 2 + 40, lineHeight + lineOff);
+        glVertex2i(r * wallWidth + screenWidth / 2 + 20, lineOff + viewHeight / 4);
+        glVertex2i(r * wallWidth + screenWidth / 2 + 20, lineHeight + lineOff + viewHeight / 4);
         glEnd();
 
         // Increment degree
