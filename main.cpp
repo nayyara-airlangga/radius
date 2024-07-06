@@ -23,7 +23,7 @@ int main(int argc, char *argv[]) {
     glutInit(&argc, argv);
     glutInitDisplayMode(GLUT_DOUBLE | GLUT_RGBA);
     glutInitWindowSize(screenWidth, screenHeight);
-    glutCreateWindow("Raycaster");
+    glutCreateWindow("Radium");
     glutReshapeFunc(disableReshape);
 
     init();

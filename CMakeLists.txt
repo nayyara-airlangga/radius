@@ -1,6 +1,6 @@
 cmake_minimum_required(VERSION 3.10)
 
-project(raycast VERSION 1.0)
+project(radium VERSION 1.0)
 
 # Get OpenGL
 find_package(OpenGL REQUIRED)
@@ -16,6 +16,6 @@ find_package(GLUT REQUIRED)
 include_directories(${OPENGL_INCLUDE_DIRS} ${GLUT_INCLUDE_DIRS})
 
 # Create executable
-add_executable(raycast main.cpp)
-target_include_directories(raycast PUBLIC ${PROJECT_BINARY_DIR})
-target_link_libraries(raycast ${OPENGL_LIBRARIES} ${GLUT_LIBRARIES})
+add_executable(radium main.cpp)
+target_include_directories(radium PUBLIC ${PROJECT_BINARY_DIR})
+target_link_libraries(radium ${OPENGL_LIBRARIES} ${GLUT_LIBRARIES})
