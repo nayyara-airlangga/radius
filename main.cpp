@@ -4,6 +4,8 @@
 #include <stdlib.h>
 
 #define PI 3.1415926535
+#define P2 PI / 2
+#define P3 3 * PI / 2
 
 #define screenWidth 1024
 #define screenHeight 512
@@ -26,6 +28,10 @@ float playerX, playerY;
 float pDeltaX, pDeltaY;
 float pAngle;
 
+float euclidean(float x1, float y1, float x2, float y2) {
+    return sqrt((x2 - x1) * (x2 - x1) + (y2 - y1) * (y2 - y1));
+}
+
 void drawRays(int rays) {
     int mx, my, mp, dof;
     float rx, ry, ra, xoff, yoff;
@@ -33,6 +39,9 @@ void drawRays(int rays) {
     ra = pAngle;
 
     for (int r = 0; r < rays; r++) {
+        float sideDistY = INT_MAX;
+        float yRayX = playerX;
+        float yRayY = playerY;
 
         // Y-Side Ray
         dof = 0;
@@ -69,12 +78,75 @@ void drawRays(int rays) {
 
             // Check if hit wall
             if (mp > 0 && mp < mapHeight * mapWidth && worldMap[mp] == 1) {
+                yRayX = rx;
+                yRayY = ry;
+                sideDistY = euclidean(playerX, playerY, yRayX, yRayY);
                 dof = 8;
             } else {
                 rx += xoff;
                 ry += yoff;
                 dof += 1;
             }
+        }
+
+        float sideDistX = INT_MAX;
+        float xRayX = playerX;
+        float xRayY = playerY;
+
+        // X-Side Ray
+        dof = 0;
+        float ntan = -tan(ra);
+
+        // Left
+        if (ra > P2 && ra < P3) {
+            rx = playerX - 0.0001;
+            ry = (playerX - rx) * ntan + playerY;
+
+            xoff = -tileSize;
+            yoff = -xoff * ntan;
+        }
+        // Right
+        if (ra < P2 || ra > P3) {
+            rx = playerX + tileSize;
+            ry = (playerX - rx) * ntan + playerY;
+
+            xoff = tileSize;
+            yoff = -xoff * ntan;
+        }
+        // Straight up or down
+        if (ra == P2 || ra == P3) {
+            rx = playerX;
+            ry = playerY;
+            dof = mapHeight;
+        }
+
+        // Check only until map bounds
+        while (dof < mapHeight) {
+            mx = (int)rx >> 6;
+            my = (int)ry >> 6;
+            mp = my * mapWidth + mx;
+
+            // Check if hit wall
+            if (mp > 0 && mp < mapHeight * mapWidth && worldMap[mp] == 1) {
+                xRayX = rx;
+                xRayY = ry;
+                sideDistX = euclidean(playerX, playerY, xRayX, xRayY);
+                dof = 8;
+            } else {
+                rx += xoff;
+                ry += yoff;
+                dof += 1;
+            }
+        }
+
+        // Choose shorter ray between Y-side or X-side
+        if (sideDistX < sideDistY) {
+            rx = xRayX;
+            ry = xRayY;
+        }
+        if (sideDistY < sideDistX) {
+            rx = yRayX;
+            ry = yRayY;
         }
 
         // Draw ray
