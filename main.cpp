@@ -28,22 +28,12 @@ float playerX, playerY;
 float pDeltaX, pDeltaY;
 float pAngle;
 
-float euclidean(float x1, float y1, float x2, float y2) {
-    return sqrt((x2 - x1) * (x2 - x1) + (y2 - y1) * (y2 - y1));
-}
-
 void drawRays(int rays) {
     int mx, my, mp, dof;
     float rx, ry, ra, xoff, yoff;
     float wallDist;
 
-    ra = pAngle - DEG_RAD * rays / 2;
-    if (ra < 0) {
-        ra += 2 * PI;
-    }
-    if (ra > 2 * PI) {
-        ra -= 2 * PI;
-    }
+    ra = fixAngle(pAngle + rays / 2);
 
     for (int r = 0; r < rays; r++) {
         float sideDistY = INT_MAX;
@@ -52,26 +42,26 @@ void drawRays(int rays) {
 
         // Y-Side Ray
         dof = 0;
-        float atan = -1 / tan(ra);
+        float invTan = 1 / tan(degToRad(ra));
 
         // Upwards
-        if (ra > PI) {
+        if (sin(degToRad(ra)) > 0.001) {
             ry = ((int)playerY >> 6 << 6) - 0.0001;
-            rx = (playerY - ry) * atan + playerX;
+            rx = (playerY - ry) * invTan + playerX;
 
             yoff = -tileSize;
-            xoff = -yoff * atan;
+            xoff = -yoff * invTan;
         }
         // Downwards
-        if (ra < PI) {
+        else if (sin(degToRad(ra)) < -0.001) {
             ry = ((int)playerY >> 6 << 6) + tileSize;
-            rx = (playerY - ry) * atan + playerX;
+            rx = (playerY - ry) * invTan + playerX;
 
             yoff = tileSize;
-            xoff = -yoff * atan;
+            xoff = -yoff * invTan;
         }
         // Straight left or right
-        if (ra == 0 || ra == PI) {
+        else {
             rx = playerX;
             ry = playerY;
             dof = mapHeight;
@@ -84,10 +74,10 @@ void drawRays(int rays) {
             mp = my * mapWidth + mx;
 
             // Check if hit wall
-            if (mp > 0 && mp < mapHeight * mapWidth && worldMap[mp] > 0) {
+            if (mp > 0 && mp < mapHeight * mapWidth && worldMap[mp] == 1) {
                 yRayX = rx;
                 yRayY = ry;
-                sideDistY = euclidean(playerX, playerY, yRayX, yRayY);
+                sideDistY = distance(playerX, playerY, yRayX, yRayY, ra);
                 dof = 8;
             } else {
                 rx += xoff;
@@ -102,26 +92,26 @@ void drawRays(int rays) {
 
         // X-Side Ray
         dof = 0;
-        float ntan = -tan(ra);
+        float Tan = tan(degToRad(ra));
 
         // Left
-        if (ra > P2 && ra < P3) {
+        if (cos(degToRad(ra)) < -0.001) {
             rx = ((int)playerX >> 6 << 6) - 0.0001;
-            ry = (playerX - rx) * ntan + playerY;
+            ry = (playerX - rx) * Tan + playerY;
 
             xoff = -tileSize;
-            yoff = -xoff * ntan;
+            yoff = -xoff * Tan;
         }
         // Right
-        if (ra < P2 || ra > P3) {
+        else if (cos(degToRad(ra)) > 0.001) {
             rx = ((int)playerX >> 6 << 6) + tileSize;
-            ry = (playerX - rx) * ntan + playerY;
+            ry = (playerX - rx) * Tan + playerY;
 
             xoff = tileSize;
-            yoff = -xoff * ntan;
+            yoff = -xoff * Tan;
         }
         // Straight up or down
-        if (ra == P2 || ra == P3) {
+        else {
             rx = playerX;
             ry = playerY;
             dof = mapHeight;
@@ -134,10 +124,10 @@ void drawRays(int rays) {
             mp = my * mapWidth + mx;
 
             // Check if hit wall
-            if (mp > 0 && mp < mapHeight * mapWidth && worldMap[mp] > 0) {
+            if (mp > 0 && mp < mapHeight * mapWidth && worldMap[mp] == 1) {
                 xRayX = rx;
                 xRayY = ry;
-                sideDistX = euclidean(playerX, playerY, xRayX, xRayY);
+                sideDistX = distance(playerX, playerY, xRayX, xRayY, ra);
                 dof = 8;
             } else {
                 rx += xoff;
@@ -152,8 +142,7 @@ void drawRays(int rays) {
             ry = xRayY;
             wallDist = sideDistX;
             glColor3f(0.9, 0, 0);
-        }
-        if (sideDistY < sideDistX) {
+        } else if (sideDistY < sideDistX) {
             rx = yRayX;
             ry = yRayY;
             wallDist = sideDistY;
@@ -168,16 +157,10 @@ void drawRays(int rays) {
         glEnd();
 
         // Draw 3d walls
-        float ca = pAngle - ra;
-        if (ca < 0) {
-            ca += 2 * PI;
-        }
-        if (ca > 2 * PI) {
-            ca -= 2 * PI;
-        }
+        float ca = fixAngle(pAngle - ra);
 
         // For reference, see orthogonal projection vector length
-        wallDist = wallDist * cos(ca); // Handle fisheye effect
+        wallDist = wallDist * cos(degToRad(ca)); // Handle fisheye effect
 
         float lineHeight = tileSize * viewHeight / wallDist;
         if (lineHeight > viewHeight) {
@@ -192,13 +175,7 @@ void drawRays(int rays) {
         glEnd();
 
         // Increment degree
-        ra += DEG_RAD;
-        if (ra < 0) {
-            ra += 2 * PI;
-        }
-        if (ra > 2 * PI) {
-            ra -= 2 * PI;
-        }
+        ra = fixAngle(ra - 1);
     }
 }
 
@@ -214,7 +191,7 @@ void drawPlayer() {
     glLineWidth(3);
     glBegin(GL_LINES);
     glVertex2i(playerX, playerY);
-    glVertex2i(playerX + pDeltaX * 5, playerY + pDeltaY * 5);
+    glVertex2i(playerX + pDeltaX * 20, playerY + pDeltaY * 20);
     glEnd();
 }
 
@@ -260,28 +237,24 @@ void disableReshape(int, int) {
 
 void onKeyPress(unsigned char key, int x, int y) {
     if (key == 'w') {
-        playerX += pDeltaX;
-        playerY += pDeltaY;
+        playerX += pDeltaX * 5;
+        playerY += pDeltaY * 5;
     }
     if (key == 'a') {
-        pAngle -= 0.1;
-        if (pAngle < 0) {
-            pAngle += 2 * PI;
-        }
-        pDeltaX = cos(pAngle) * 5;
-        pDeltaY = sin(pAngle) * 5;
+        pAngle += 5;
+        pAngle = fixAngle(pAngle);
+        pDeltaX = cos(degToRad(pAngle));
+        pDeltaY = -sin(degToRad(pAngle));
     }
     if (key == 's') {
-        playerX -= pDeltaX;
-        playerY -= pDeltaY;
+        playerX -= pDeltaX * 5;
+        playerY -= pDeltaY * 5;
     }
     if (key == 'd') {
-        pAngle += 0.1;
-        if (pAngle > 2 * PI) {
-            pAngle -= 2 * PI;
-        }
-        pDeltaX = cos(pAngle) * 5;
-        pDeltaY = sin(pAngle) * 5;
+        pAngle -= 5;
+        pAngle = fixAngle(pAngle);
+        pDeltaX = cos(degToRad(pAngle));
+        pDeltaY = -sin(degToRad(pAngle));
     }
 
     glutPostRedisplay();
@@ -294,9 +267,9 @@ void init() {
 
     playerX = screenWidth / 4;
     playerY = screenHeight / 2;
-    pAngle = 3 * PI / 2;
-    pDeltaX = cos(pAngle) * 5;
-    pDeltaY = sin(pAngle) * 5;
+    pAngle = 90;
+    pDeltaX = cos(degToRad(pAngle));
+    pDeltaY = -sin(degToRad(pAngle));
 }
 
 int main(int argc, char *argv[]) {

@@ -1,4 +1,3 @@
-#define PI 3.1415926535
-#define P2 PI / 2
-#define P3 3 * PI / 2
-#define DEG_RAD 0.0174533 // one degree in radians
+float degToRad(float angle);
+float fixAngle(float angle);
+float distance(float x1, float y1, float x2, float y2, float angle);
