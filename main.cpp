@@ -1,6 +1,5 @@
 #include <GL/freeglut.h>
 #include <cmath>
-#include <stdio.h>
 #include <stdlib.h>
 
 #include "texture.h"
@@ -145,16 +144,21 @@ void drawRays(int rays) {
             }
         }
 
+        // Wall shading
+        float shade;
+
         // Choose shorter ray between Y-side or X-side
         if (sideDistX <= sideDistY) {
             rx = xRayX;
             ry = xRayY;
             wallDist = sideDistX;
+            shade = 1;
             glColor3f(0.9, 0, 0);
         } else if (sideDistY < sideDistX) {
             rx = yRayX;
             ry = yRayY;
             wallDist = sideDistY;
+            shade = 0.5;
             glColor3f(0.7, 0, 0);
         }
 
@@ -174,19 +178,24 @@ void drawRays(int rays) {
         wallDist = wallDist * cos(degToRad(ca)); // Handle fisheye effect
 
         float lineHeight = tileSize * viewHeight / wallDist;
+
+        // Prevent abrupt line height clipping when closer to wall
+        float textureYStep = textureHeight / lineHeight;
+        float textureYOff = 0;
+
         if (lineHeight > viewHeight) {
+            textureYOff = (lineHeight - viewHeight) / 2;
             lineHeight = viewHeight;
         }
         float lineOff = viewHeight / 2 - lineHeight / 2;
 
-        float textureY = 0;
-        float textureYStep = textureHeight / lineHeight;
+        float textureY = textureYStep * textureYOff;
 
         glLineWidth(wallWidth);
         glBegin(GL_POINTS);
 
         for (int y = 0; y < lineHeight; y++) {
-            float color = textures[textureCode][(int)textureY * textureWidth];
+            float color = textures[textureCode][(int)textureY * textureWidth] * shade;
 
             glColor3f(color, color, color);
             glVertex2i(r * wallWidth + screenWidth / 2 + 20, y + lineOff + viewHeight / 4);
