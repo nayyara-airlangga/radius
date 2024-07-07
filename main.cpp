@@ -13,7 +13,7 @@
 #define mapHeight 8
 #define mapSize 64
 #define tileSize 64
-#define mvSpeed 0.2
+#define mvSpeed 0.15
 #define rotSpeed 0.175
 
 typedef struct {
