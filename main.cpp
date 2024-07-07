@@ -137,7 +137,7 @@ void drawRays(int rays) {
         }
 
         // Choose shorter ray between Y-side or X-side
-        if (sideDistX < sideDistY) {
+        if (sideDistX <= sideDistY) {
             rx = xRayX;
             ry = xRayY;
             wallDist = sideDistX;
