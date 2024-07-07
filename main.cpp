@@ -23,14 +23,14 @@ typedef struct {
 MvKeyStates mvKeyStates;
 
 int worldMap[mapSize] =
-    {1, 1, 1, 1, 1, 1, 1, 1,
-     1, 0, 1, 0, 0, 1, 1, 1,
-     1, 0, 1, 0, 0, 0, 1, 1,
-     1, 0, 1, 0, 0, 0, 0, 1,
+    {1, 2, 2, 3, 3, 2, 2, 1,
+     1, 0, 2, 0, 0, 0, 0, 1,
+     1, 0, 2, 0, 0, 0, 0, 1,
+     3, 0, 2, 0, 0, 0, 0, 3,
+     3, 0, 0, 0, 0, 0, 0, 3,
+     1, 0, 0, 0, 0, 2, 0, 1,
      1, 0, 0, 0, 0, 0, 0, 1,
-     1, 0, 0, 0, 0, 1, 0, 1,
-     1, 0, 0, 0, 0, 0, 0, 1,
-     1, 1, 1, 1, 1, 1, 1, 1};
+     1, 2, 2, 4, 4, 2, 2, 1};
 
 float playerX, playerY;
 float pDeltaX, pDeltaY;
@@ -82,7 +82,7 @@ void drawRays(int rays) {
             mp = my * mapWidth + mx;
 
             // Check if hit wall
-            if (mp > 0 && mp < mapHeight * mapWidth && worldMap[mp] == 1) {
+            if (mp > 0 && mp < mapHeight * mapWidth && worldMap[mp] > 0) {
                 yRayX = rx;
                 yRayY = ry;
                 sideDistY = distance(playerX, playerY, yRayX, yRayY, ra);
@@ -132,7 +132,7 @@ void drawRays(int rays) {
             mp = my * mapWidth + mx;
 
             // Check if hit wall
-            if (mp > 0 && mp < mapHeight * mapWidth && worldMap[mp] == 1) {
+            if (mp > 0 && mp < mapHeight * mapWidth && worldMap[mp] > 0) {
                 xRayX = rx;
                 xRayY = ry;
                 sideDistX = distance(playerX, playerY, xRayX, xRayY, ra);
@@ -245,7 +245,7 @@ void drawMap() {
     for (int y = 0; y < mapHeight; y++) {
         for (int x = 0; x < mapWidth; x++) {
             // Default color is black to denote blank space
-            if (worldMap[y * mapWidth + x] == 1) {
+            if (worldMap[y * mapWidth + x] > 0) {
                 glColor3f(1, 1, 1);
             } else {
                 glColor3f(0, 0, 0);
