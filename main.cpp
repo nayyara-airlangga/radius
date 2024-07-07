@@ -152,14 +152,14 @@ void drawRays(int rays) {
             rx = xRayX;
             ry = xRayY;
             wallDist = sideDistX;
-            shade = 1;
-            glColor3f(0.9, 0, 0);
+            shade = 0.5;
+            glColor3f(0.7, 0, 0);
         } else if (sideDistY < sideDistX) {
             rx = yRayX;
             ry = yRayY;
             wallDist = sideDistY;
-            shade = 0.5;
-            glColor3f(0.7, 0, 0);
+            shade = 1;
+            glColor3f(0.9, 0, 0);
         }
 
         // Draw ray
@@ -190,12 +190,26 @@ void drawRays(int rays) {
         float lineOff = viewHeight / 2 - lineHeight / 2;
 
         float textureY = textureYStep * textureYOff;
+        float textureX;
+
+        // Handle flipping when viewing south or west
+        if (shade == 1) {
+            textureX = ((int)rx / 2) % textureWidth;
+            if (ra > 180) {
+                textureX = textureWidth - 1 - textureX;
+            }
+        } else {
+            textureX = ((int)ry / 2) % textureHeight;
+            if (ra > 90 && ra < 270) {
+                textureX = textureHeight - 1 - textureX;
+            }
+        }
 
         glLineWidth(wallWidth);
         glBegin(GL_POINTS);
 
         for (int y = 0; y < lineHeight; y++) {
-            float color = textures[textureCode][(int)textureY * textureWidth] * shade;
+            float color = textures[textureCode][(int)textureY * textureWidth + (int)textureX] * shade;
 
             glColor3f(color, color, color);
             glVertex2i(r * wallWidth + screenWidth / 2 + 20, y + lineOff + viewHeight / 4);
