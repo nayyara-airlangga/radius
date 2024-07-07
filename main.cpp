@@ -14,6 +14,12 @@
 #define mapSize 64
 #define tileSize 64
 
+typedef struct {
+    bool w, a, s, d;
+} MvKeyStates;
+
+MvKeyStates mvKeyStates;
+
 int worldMap[mapSize] =
     {1, 1, 1, 1, 1, 1, 1, 1,
      1, 0, 1, 0, 0, 1, 1, 1,
@@ -223,7 +229,33 @@ void drawMap() {
     }
 }
 
+void movePlayer() {
+    if (mvKeyStates.w) {
+        playerX += pDeltaX * 5;
+        playerY += pDeltaY * 5;
+    }
+    if (mvKeyStates.a) {
+        pAngle += 5;
+        pAngle = fixAngle(pAngle);
+        pDeltaX = cos(degToRad(pAngle));
+        pDeltaY = -sin(degToRad(pAngle));
+    }
+    if (mvKeyStates.s) {
+        playerX -= pDeltaX * 5;
+        playerY -= pDeltaY * 5;
+    }
+    if (mvKeyStates.d) {
+        pAngle -= 5;
+        pAngle = fixAngle(pAngle);
+        pDeltaX = cos(degToRad(pAngle));
+        pDeltaY = -sin(degToRad(pAngle));
+    }
+
+    glutPostRedisplay();
+}
+
 void display() {
+    movePlayer();
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
     drawMap();
     drawRays(60);
@@ -235,29 +267,34 @@ void disableReshape(int, int) {
     glutReshapeWindow(screenWidth, screenHeight);
 }
 
-void onKeyPress(unsigned char key, int x, int y) {
+void onKeyDown(unsigned char key, int x, int y) {
     if (key == 'w') {
-        playerX += pDeltaX * 5;
-        playerY += pDeltaY * 5;
+        mvKeyStates.w = true;
     }
     if (key == 'a') {
-        pAngle += 5;
-        pAngle = fixAngle(pAngle);
-        pDeltaX = cos(degToRad(pAngle));
-        pDeltaY = -sin(degToRad(pAngle));
+        mvKeyStates.a = true;
     }
     if (key == 's') {
-        playerX -= pDeltaX * 5;
-        playerY -= pDeltaY * 5;
+        mvKeyStates.s = true;
     }
     if (key == 'd') {
-        pAngle -= 5;
-        pAngle = fixAngle(pAngle);
-        pDeltaX = cos(degToRad(pAngle));
-        pDeltaY = -sin(degToRad(pAngle));
+        mvKeyStates.d = true;
     }
+}
 
-    glutPostRedisplay();
+void onKeyUp(unsigned char key, int x, int y) {
+    if (key == 'w') {
+        mvKeyStates.w = false;
+    }
+    if (key == 'a') {
+        mvKeyStates.a = false;
+    }
+    if (key == 's') {
+        mvKeyStates.s = false;
+    }
+    if (key == 'd') {
+        mvKeyStates.d = false;
+    }
 }
 
 // Screen and player initialization
@@ -282,6 +319,7 @@ int main(int argc, char *argv[]) {
     init();
 
     glutDisplayFunc(display);
-    glutKeyboardFunc(onKeyPress);
+    glutKeyboardFunc(onKeyDown);
+    glutKeyboardUpFunc(onKeyUp);
     glutMainLoop();
 }
