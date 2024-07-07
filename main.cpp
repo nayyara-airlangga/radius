@@ -166,6 +166,8 @@ void drawRays(int rays) {
         glEnd();
 
         // Draw 3d walls
+        float textureCode = worldMap[((int)ry / tileSize * mapWidth + (int)rx / tileSize)];
+
         float ca = fixAngle(pAngle - ra);
 
         // For reference, see orthogonal projection vector length
@@ -177,10 +179,20 @@ void drawRays(int rays) {
         }
         float lineOff = viewHeight / 2 - lineHeight / 2;
 
+        float textureY = 0;
+        float textureYStep = textureHeight / lineHeight;
+
         glLineWidth(wallWidth);
-        glBegin(GL_LINES);
-        glVertex2i(r * wallWidth + screenWidth / 2 + 20, lineOff + viewHeight / 4);
-        glVertex2i(r * wallWidth + screenWidth / 2 + 20, lineHeight + lineOff + viewHeight / 4);
+        glBegin(GL_POINTS);
+
+        for (int y = 0; y < lineHeight; y++) {
+            float color = textures[textureCode][(int)textureY * textureWidth];
+
+            glColor3f(color, color, color);
+            glVertex2i(r * wallWidth + screenWidth / 2 + 20, y + lineOff + viewHeight / 4);
+
+            textureY += textureYStep;
+        }
         glEnd();
 
         // Increment degree
@@ -297,10 +309,30 @@ void movePlayer() {
     glutPostRedisplay();
 }
 
+void drawViewBorder() {
+    glColor3f(211, 211, 211);
+    glLineWidth(8);
+    glBegin(GL_LINES);
+    // Left
+    glVertex2i(screenWidth / 2 + 10, ((5 * viewHeight) >> 2) + 10);
+    glVertex2i(screenWidth / 2 + 10, viewHeight / 4 - 10);
+    // Right
+    glVertex2i(screenWidth - 10, ((5 * viewHeight) >> 2) + 10);
+    glVertex2i(screenWidth - 10, viewHeight / 4 - 10);
+    // Up
+    glVertex2i(screenWidth / 2 + 10, viewHeight / 4 - 10);
+    glVertex2i(screenWidth - 10, viewHeight / 4 - 10);
+    // Down
+    glVertex2i(screenWidth / 2 + 10, ((5 * viewHeight) >> 2) + 10);
+    glVertex2i(screenWidth - 10, ((5 * viewHeight) >> 2) + 10);
+    glEnd();
+}
+
 void display() {
     setDeltaTime();
     movePlayer();
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+    drawViewBorder();
     drawMap();
     drawRays(60);
     drawPlayer();
