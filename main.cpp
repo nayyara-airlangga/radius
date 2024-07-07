@@ -22,7 +22,7 @@ typedef struct {
 
 MvKeyStates mvKeyStates;
 
-int worldMap[mapSize] =
+int mapWalls[mapSize] =
     {1, 2, 2, 3, 3, 2, 2, 1,
      1, 0, 2, 0, 0, 0, 0, 1,
      1, 0, 2, 0, 0, 0, 0, 1,
@@ -82,7 +82,7 @@ void drawRays(int rays) {
             mp = my * mapWidth + mx;
 
             // Check if hit wall
-            if (mp > 0 && mp < mapHeight * mapWidth && worldMap[mp] > 0) {
+            if (mp > 0 && mp < mapHeight * mapWidth && mapWalls[mp] > 0) {
                 yRayX = rx;
                 yRayY = ry;
                 sideDistY = distance(playerX, playerY, yRayX, yRayY, ra);
@@ -132,7 +132,7 @@ void drawRays(int rays) {
             mp = my * mapWidth + mx;
 
             // Check if hit wall
-            if (mp > 0 && mp < mapHeight * mapWidth && worldMap[mp] > 0) {
+            if (mp > 0 && mp < mapHeight * mapWidth && mapWalls[mp] > 0) {
                 xRayX = rx;
                 xRayY = ry;
                 sideDistX = distance(playerX, playerY, xRayX, xRayY, ra);
@@ -170,7 +170,7 @@ void drawRays(int rays) {
         glEnd();
 
         // Draw 3d walls
-        float textureCode = worldMap[((int)ry / tileSize * mapWidth + (int)rx / tileSize)];
+        float textureCode = mapWalls[((int)ry / tileSize * mapWidth + (int)rx / tileSize)];
 
         float ca = fixAngle(pAngle - ra);
 
@@ -245,7 +245,7 @@ void drawMap() {
     for (int y = 0; y < mapHeight; y++) {
         for (int x = 0; x < mapWidth; x++) {
             // Default color is black to denote blank space
-            if (worldMap[y * mapWidth + x] > 0) {
+            if (mapWalls[y * mapWidth + x] > 0) {
                 glColor3f(1, 1, 1);
             } else {
                 glColor3f(0, 0, 0);
@@ -299,18 +299,18 @@ void movePlayer() {
 
     // Position movements
     if (mvKeyStates.w) {
-        if (worldMap[tilePy * mapWidth + tilePxAddoff] == 0) {
+        if (mapWalls[tilePy * mapWidth + tilePxAddoff] == 0) {
             playerX += pDeltaX * mvSpeed * deltaTime;
         }
-        if (worldMap[tilePyAddoff * mapWidth + tilePx] == 0) {
+        if (mapWalls[tilePyAddoff * mapWidth + tilePx] == 0) {
             playerY += pDeltaY * mvSpeed * deltaTime;
         }
     }
     if (mvKeyStates.s) {
-        if (worldMap[tilePy * mapWidth + tilePxSuboff] == 0) {
+        if (mapWalls[tilePy * mapWidth + tilePxSuboff] == 0) {
             playerX -= pDeltaX * mvSpeed * deltaTime;
         }
-        if (worldMap[tilePySuboff * mapWidth + tilePx] == 0) {
+        if (mapWalls[tilePySuboff * mapWidth + tilePx] == 0) {
             playerY -= pDeltaY * mvSpeed * deltaTime;
         }
     }
