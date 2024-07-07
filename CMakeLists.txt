@@ -13,9 +13,10 @@ endif()
 
 find_package(GLUT REQUIRED)
 
-include_directories(${OPENGL_INCLUDE_DIRS} ${GLUT_INCLUDE_DIRS})
+# Set source files
+set(PROJ_SOURCE_FILES main.cpp trig.cpp)
 
 # Create executable
-add_executable(radius main.cpp trig.cpp)
-target_include_directories(radius PUBLIC ${PROJECT_BINARY_DIR} ${PROJECT_SOURCE_DIR})
+add_executable(radius ${PROJ_SOURCE_FILES})
+target_include_directories(radius PRIVATE ${PROJECT_SOURCE_DIR} ${OPENGL_INCLUDE_DIRS} ${GLUT_INCLUDE_DIRS})
 target_link_libraries(radius ${OPENGL_LIBRARIES} ${GLUT_LIBRARIES})
