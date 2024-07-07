@@ -13,6 +13,8 @@
 #define mapHeight 8
 #define mapSize 64
 #define tileSize 64
+#define mvSpeed 0.2
+#define rotSpeed 0.175
 
 typedef struct {
     bool w, a, s, d;
@@ -229,23 +231,32 @@ void drawMap() {
     }
 }
 
+float prevTime, newTime, deltaTime;
+
+// Time deltas to adjust speed based on frame rate
+void setDeltaTime() {
+    newTime = glutGet(GLUT_ELAPSED_TIME);
+    deltaTime = newTime - prevTime;
+    prevTime = newTime;
+}
+
 void movePlayer() {
     if (mvKeyStates.w) {
-        playerX += pDeltaX * 5;
-        playerY += pDeltaY * 5;
+        playerX += pDeltaX * mvSpeed * deltaTime;
+        playerY += pDeltaY * mvSpeed * deltaTime;
     }
     if (mvKeyStates.a) {
-        pAngle += 5;
+        pAngle += rotSpeed * deltaTime;
         pAngle = fixAngle(pAngle);
         pDeltaX = cos(degToRad(pAngle));
         pDeltaY = -sin(degToRad(pAngle));
     }
     if (mvKeyStates.s) {
-        playerX -= pDeltaX * 5;
-        playerY -= pDeltaY * 5;
+        playerX -= pDeltaX * mvSpeed * deltaTime;
+        playerY -= pDeltaY * mvSpeed * deltaTime;
     }
     if (mvKeyStates.d) {
-        pAngle -= 5;
+        pAngle -= rotSpeed * deltaTime;
         pAngle = fixAngle(pAngle);
         pDeltaX = cos(degToRad(pAngle));
         pDeltaY = -sin(degToRad(pAngle));
@@ -255,6 +266,7 @@ void movePlayer() {
 }
 
 void display() {
+    setDeltaTime();
     movePlayer();
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
     drawMap();
