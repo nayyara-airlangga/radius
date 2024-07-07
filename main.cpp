@@ -241,19 +241,50 @@ void setDeltaTime() {
 }
 
 void movePlayer() {
-    if (mvKeyStates.w) {
-        playerX += pDeltaX * mvSpeed * deltaTime;
-        playerY += pDeltaY * mvSpeed * deltaTime;
+    // Offset for collision detection
+    int xoff, yoff;
+    if (pDeltaX < 0) {
+        xoff = -20;
+    } else {
+        xoff = 20;
     }
+    if (pDeltaY < 0) {
+        yoff = -20;
+    } else {
+        yoff = 20;
+    }
+
+    int tilePx = playerX / tileSize;
+    int tilePxAddoff = (playerX + xoff) / tileSize;
+    int tilePxSuboff = (playerX - xoff / 2) / tileSize;
+    int tilePy = (playerY) / tileSize;
+    int tilePyAddoff = (playerY + yoff) / tileSize;
+    int tilePySuboff = (playerY - yoff / 2) / tileSize;
+
+    // Position movements
+    if (mvKeyStates.w) {
+        if (worldMap[tilePy * mapWidth + tilePxAddoff] == 0) {
+            playerX += pDeltaX * mvSpeed * deltaTime;
+        }
+        if (worldMap[tilePyAddoff * mapWidth + tilePx] == 0) {
+            playerY += pDeltaY * mvSpeed * deltaTime;
+        }
+    }
+    if (mvKeyStates.s) {
+        if (worldMap[tilePy * mapWidth + tilePxSuboff] == 0) {
+            playerX -= pDeltaX * mvSpeed * deltaTime;
+        }
+        if (worldMap[tilePySuboff * mapWidth + tilePx] == 0) {
+            playerY -= pDeltaY * mvSpeed * deltaTime;
+        }
+    }
+
+    // Camera rotation
     if (mvKeyStates.a) {
         pAngle += rotSpeed * deltaTime;
         pAngle = fixAngle(pAngle);
         pDeltaX = cos(degToRad(pAngle));
         pDeltaY = -sin(degToRad(pAngle));
-    }
-    if (mvKeyStates.s) {
-        playerX -= pDeltaX * mvSpeed * deltaTime;
-        playerY -= pDeltaY * mvSpeed * deltaTime;
     }
     if (mvKeyStates.d) {
         pAngle -= rotSpeed * deltaTime;
