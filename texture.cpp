@@ -16,6 +16,8 @@ namespace fs = std::filesystem;
 
 const fs::path texturesDir{"textures"};
 
+map<int, array<int, textureHeight * textureWidth>> textures;
+
 // Load textures from "textures" directoy. Textures must be named as "<texture_code>_<texture-name>"
 void loadTextures() {
     // Loop through all textures in textures directory

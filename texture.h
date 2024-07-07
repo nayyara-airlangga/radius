@@ -7,6 +7,6 @@ using std::map;
 #define textureWidth 32
 #define textureHeight 32
 
-map<int, array<int, textureHeight * textureWidth>> textures;
+extern map<int, array<int, textureHeight * textureWidth>> textures;
 
 void loadTextures();

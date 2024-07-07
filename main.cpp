@@ -3,6 +3,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 
+#include "texture.h"
 #include "trig.h"
 
 #define screenWidth 1024
@@ -340,8 +341,10 @@ void onKeyUp(unsigned char key, int x, int y) {
     }
 }
 
-// Screen and player initialization
+// Initialization stuff like position, screen, and textures
 void init() {
+    loadTextures();
+
     glClearColor(0.3, 0.3, 0.3, 0);
     gluOrtho2D(0, screenWidth, screenHeight, 0);
 
