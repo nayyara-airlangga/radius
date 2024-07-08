@@ -26,11 +26,11 @@ int mapWalls[mapSize] =
     {1, 2, 2, 3, 3, 2, 2, 1,
      1, 0, 2, 0, 0, 0, 0, 1,
      1, 0, 2, 0, 0, 0, 0, 1,
-     3, 0, 2, 0, 0, 0, 0, 3,
+     3, 4, 2, 0, 0, 0, 0, 3,
      3, 0, 0, 0, 0, 0, 0, 3,
      1, 0, 0, 0, 0, 2, 0, 1,
      1, 0, 0, 0, 0, 0, 0, 1,
-     1, 2, 2, 4, 4, 2, 2, 1};
+     1, 2, 2, 2, 2, 2, 2, 1};
 
 float playerX, playerY;
 float pDeltaX, pDeltaY;
@@ -378,6 +378,32 @@ void onKeyDown(unsigned char key, int x, int y) {
     }
     if (key == 'd') {
         mvKeyStates.d = true;
+    }
+
+    // Open doors and interact
+    if (key == 'e') {
+        // Offset for door detection
+        int xoff, yoff;
+        if (pDeltaX < 0) {
+            xoff = -25;
+        } else {
+            xoff = 25;
+        }
+        if (pDeltaY < 0) {
+            yoff = -25;
+        } else {
+            yoff = 25;
+        }
+
+        int tilePx = playerX / tileSize;
+        int tilePxAddoff = (playerX + xoff) / tileSize;
+        int tilePy = (playerY) / tileSize;
+        int tilePyAddoff = (playerY + yoff) / tileSize;
+
+        // Opening door means removing it AKA set to zero
+        if (mapWalls[tilePyAddoff * mapWidth + tilePxAddoff] == 4) {
+            mapWalls[tilePyAddoff * mapWidth + tilePxAddoff] = 0;
+        }
     }
 }
 
