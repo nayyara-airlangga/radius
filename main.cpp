@@ -5,18 +5,20 @@
 #include "texture.h"
 #include "trig.h"
 
-#define screenWidth 1024
-#define screenHeight 512
-#define viewHeight 340
+#define screenWidth 960
+#define screenHeight 640
+#define viewHeight 640
 #define wallWidth 8
 #define mapWidth 8
 #define mapHeight 8
 #define mapSize 64
 #define tileSize 64
-#define mvSpeed 0.15
+#define mvSpeed 0.175
 #define rotSpeed 0.175
 #define floorShade 0.7
 #define ceilShade 0.7
+#define numberOfRays 120
+#define rayAngleDelta 0.5
 
 typedef struct {
     bool w, a, s, d;
@@ -63,7 +65,7 @@ void drawRays(int rays) {
     float rx, ry, ra, xoff, yoff;
     float wallDist;
 
-    ra = fixAngle(pAngle + rays / 2);
+    ra = fixAngle(pAngle + rays / 4);
 
     for (int r = 0; r < rays; r++) {
         float sideDistY = INT_MAX;
@@ -184,12 +186,13 @@ void drawRays(int rays) {
             glColor3f(0.9, 0, 0);
         }
 
+        // Might wanna revisit in the future
         // Draw ray
-        glLineWidth(1);
-        glBegin(GL_LINES);
-        glVertex2i(playerX, playerY);
-        glVertex2i(rx, ry);
-        glEnd();
+        // glLineWidth(1);
+        // glBegin(GL_LINES);
+        // glVertex2i(playerX, playerY);
+        // glVertex2i(rx, ry);
+        // glEnd();
 
         // Draw 3d walls
         float textureCode = mapWalls[((int)ry / tileSize * mapWidth + (int)rx / tileSize)];
@@ -237,7 +240,7 @@ void drawRays(int rays) {
             float blue = textures[textureCode][pixelPos + 2] * shade;
 
             glColor3ub(red, green, blue);
-            glVertex2i(r * wallWidth + screenWidth / 2 + 20, y + lineOff + viewHeight / 4);
+            glVertex2i(r * wallWidth, y + lineOff);
 
             textureY += textureYStep;
         }
@@ -261,7 +264,7 @@ void drawRays(int rays) {
             float blue = textures[textureCode][pixelPos + 2] * floorShade;
 
             glColor3ub(red, green, blue);
-            glVertex2i(r * wallWidth + screenWidth / 2 + 20, y + viewHeight / 4);
+            glVertex2i(r * wallWidth, y);
 
             // Draw ceilings
             textureCode = mapCeilings[((int)textureY / textureHeight * mapWidth + (int)textureX / textureWidth)];
@@ -272,58 +275,60 @@ void drawRays(int rays) {
             blue = textures[textureCode][pixelPos + 2] * ceilShade;
 
             glColor3ub(red, green, blue);
-            glVertex2i(r * wallWidth + screenWidth / 2 + 20, viewHeight - y + viewHeight / 4);
+            glVertex2i(r * wallWidth, viewHeight - y);
         }
         glEnd();
 
         // Increment degree
-        ra = fixAngle(ra - 1);
+        ra = fixAngle(ra - rayAngleDelta);
     }
 }
 
-void drawPlayer() {
-    // Draw player pixel
-    glColor3f(0, 255, 0);
-    glPointSize(8);
-    glBegin(GL_POINTS);
-    glVertex2i(playerX, playerY);
-    glEnd();
+// Might wanna revisit in the future
+// void drawPlayer() {
+//     // Draw player pixel
+//     glColor3f(0, 255, 0);
+//     glPointSize(8);
+//     glBegin(GL_POINTS);
+//     glVertex2i(playerX, playerY);
+//     glEnd();
 
-    // Draw point
-    glLineWidth(3);
-    glBegin(GL_LINES);
-    glVertex2i(playerX, playerY);
-    glVertex2i(playerX + pDeltaX * 20, playerY + pDeltaY * 20);
-    glEnd();
-}
+//     // Draw point
+//     glLineWidth(3);
+//     glBegin(GL_LINES);
+//     glVertex2i(playerX, playerY);
+//     glVertex2i(playerX + pDeltaX * 20, playerY + pDeltaY * 20);
+//     glEnd();
+// }
 
-void drawMap() {
-    int x0, y0;
+// Might wanna revisit in the future
+// void drawMap() {
+//     int x0, y0;
 
-    for (int y = 0; y < mapHeight; y++) {
-        for (int x = 0; x < mapWidth; x++) {
-            // Default color is black to denote blank space
-            if (mapWalls[y * mapWidth + x] > 0) {
-                glColor3f(1, 1, 1);
-            } else {
-                glColor3f(0, 0, 0);
-            }
+//     for (int y = 0; y < mapHeight; y++) {
+//         for (int x = 0; x < mapWidth; x++) {
+//             // Default color is black to denote blank space
+//             if (mapWalls[y * mapWidth + x] > 0) {
+//                 glColor3f(1, 1, 1);
+//             } else {
+//                 glColor3f(0, 0, 0);
+//             }
 
-            x0 = x * tileSize;
-            y0 = y * tileSize;
+//             x0 = x * tileSize;
+//             y0 = y * tileSize;
 
-            // Draw square with two triangles
-            glBegin(GL_TRIANGLES);
-            glVertex2i(x0 + 1, y0 + 1);
-            glVertex2i(x0 + 1, y0 + tileSize - 1);
-            glVertex2i(x0 + tileSize - 1, y0 + tileSize - 1);
-            glVertex2i(x0 + 1, y0 + 1);
-            glVertex2i(x0 + tileSize - 1, y0 + 1);
-            glVertex2i(x0 + tileSize - 1, y0 + tileSize - 1);
-            glEnd();
-        }
-    }
-}
+//             // Draw square with two triangles
+//             glBegin(GL_TRIANGLES);
+//             glVertex2i(x0 + 1, y0 + 1);
+//             glVertex2i(x0 + 1, y0 + tileSize - 1);
+//             glVertex2i(x0 + tileSize - 1, y0 + tileSize - 1);
+//             glVertex2i(x0 + 1, y0 + 1);
+//             glVertex2i(x0 + tileSize - 1, y0 + 1);
+//             glVertex2i(x0 + tileSize - 1, y0 + tileSize - 1);
+//             glEnd();
+//         }
+//     }
+// }
 
 float prevTime, newTime, deltaTime;
 
@@ -390,33 +395,34 @@ void movePlayer() {
     glutPostRedisplay();
 }
 
-void drawViewBorder() {
-    glColor3f(211, 211, 211);
-    glLineWidth(8);
-    glBegin(GL_LINES);
-    // Left
-    glVertex2i(screenWidth / 2 + 10, ((5 * viewHeight) >> 2) + 10);
-    glVertex2i(screenWidth / 2 + 10, viewHeight / 4 - 10);
-    // Right
-    glVertex2i(screenWidth - 10, ((5 * viewHeight) >> 2) + 10);
-    glVertex2i(screenWidth - 10, viewHeight / 4 - 10);
-    // Up
-    glVertex2i(screenWidth / 2 + 10, viewHeight / 4 - 10);
-    glVertex2i(screenWidth - 10, viewHeight / 4 - 10);
-    // Down
-    glVertex2i(screenWidth / 2 + 10, ((5 * viewHeight) >> 2) + 10);
-    glVertex2i(screenWidth - 10, ((5 * viewHeight) >> 2) + 10);
-    glEnd();
-}
+// Might revisit in the future
+// void drawViewBorder() {
+//     glColor3f(211, 211, 211);
+//     glLineWidth(8);
+//     glBegin(GL_LINES);
+//     // Left
+//     glVertex2i(screenWidth / 2 + 10, ((5 * viewHeight) >> 2) + 10);
+//     glVertex2i(screenWidth / 2 + 10, viewHeight / 4 - 10);
+//     // Right
+//     glVertex2i(screenWidth - 10, ((5 * viewHeight) >> 2) + 10);
+//     glVertex2i(screenWidth - 10, viewHeight / 4 - 10);
+//     // Up
+//     glVertex2i(screenWidth / 2 + 10, viewHeight / 4 - 10);
+//     glVertex2i(screenWidth - 10, viewHeight / 4 - 10);
+//     // Down
+//     glVertex2i(screenWidth / 2 + 10, ((5 * viewHeight) >> 2) + 10);
+//     glVertex2i(screenWidth - 10, ((5 * viewHeight) >> 2) + 10);
+//     glEnd();
+// }
 
 void display() {
     setDeltaTime();
     movePlayer();
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-    drawViewBorder();
-    drawMap();
-    drawRays(60);
-    drawPlayer();
+    // drawViewBorder();
+    // drawMap();
+    drawRays(numberOfRays);
+    // drawPlayer();
     glutSwapBuffers();
 }
 
@@ -497,6 +503,7 @@ void init() {
 int main(int argc, char *argv[]) {
     glutInit(&argc, argv);
     glutInitDisplayMode(GLUT_DOUBLE | GLUT_RGBA);
+    glutInitWindowPosition((glutGet(GLUT_SCREEN_WIDTH) - screenWidth) / 2, (glutGet(GLUT_SCREEN_HEIGHT) - screenHeight) / 2);
     glutInitWindowSize(screenWidth, screenHeight);
     glutCreateWindow("Radius");
     glutReshapeFunc(disableReshape);
