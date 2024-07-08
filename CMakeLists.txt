@@ -1,6 +1,6 @@
 cmake_minimum_required(VERSION 3.10)
 
-project(radius VERSION 1.0)
+project(Radius VERSION 1.0)
 
 # Get OpenGL
 find_package(OpenGL REQUIRED)
@@ -17,13 +17,13 @@ find_package(GLUT REQUIRED)
 set(PROJ_SOURCE_FILES main.cpp texture.cpp trig.cpp)
 
 # Create executable
-add_executable(radius ${PROJ_SOURCE_FILES})
+add_executable(Radius ${PROJ_SOURCE_FILES})
 
-target_include_directories(radius PRIVATE ${PROJECT_SOURCE_DIR} ${OPENGL_INCLUDE_DIRS} ${GLUT_INCLUDE_DIRS})
-target_link_libraries(radius ${OPENGL_LIBRARIES} ${GLUT_LIBRARIES})
+target_include_directories(Radius PRIVATE ${PROJECT_SOURCE_DIR} ${OPENGL_INCLUDE_DIRS} ${GLUT_INCLUDE_DIRS})
+target_link_libraries(Radius ${OPENGL_LIBRARIES} ${GLUT_LIBRARIES})
 
 # Copy textures
 add_custom_target(copy_textures
     COMMAND ${CMAKE_COMMAND} -P ${CMAKE_CURRENT_LIST_DIR}/CopyTextures.cmake
 )
-add_dependencies(radius copy_textures)
+add_dependencies(Radius copy_textures)
