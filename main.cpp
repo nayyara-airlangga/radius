@@ -48,12 +48,12 @@ int mapFloors[mapSize] =
 
 int mapCeilings[mapSize] =
     {0, 0, 0, 0, 0, 0, 0, 0,
-     0, 3, 3, 3, 3, 3, 3, 0,
-     0, 3, 3, 3, 3, 3, 3, 0,
-     0, 3, 3, 3, 3, 3, 3, 0,
-     0, 3, 3, 3, 3, 3, 3, 0,
-     0, 3, 3, 3, 3, 3, 3, 0,
-     0, 3, 3, 3, 3, 3, 3, 0,
+     0, 0, 0, 0, 0, 0, 0, 0,
+     0, 0, 0, 0, 0, 0, 0, 0,
+     0, 0, 0, 0, 0, 0, 0, 0,
+     0, 0, 0, 0, 0, 0, 0, 0,
+     0, 0, 0, 0, 0, 0, 0, 0,
+     0, 0, 0, 0, 0, 0, 0, 0,
      0, 0, 0, 0, 0, 0, 0, 0};
 
 float playerX, playerY;
@@ -67,7 +67,7 @@ void drawRays(int rays) {
 
     ra = fixAngle(pAngle + rays / 4);
 
-    for (int r = 0; r < rays; r++) {
+    for (int r = 0; r <= rays; r++) {
         float sideDistY = INT_MAX;
         float yRayX = playerX;
         float yRayY = playerY;
@@ -268,20 +268,44 @@ void drawRays(int rays) {
 
             // Draw ceilings
             textureCode = mapCeilings[((int)textureY / textureHeight * mapWidth + (int)textureX / textureWidth)];
+            if (textureCode > 0) {
+                pixelPos = 3 * (((int)textureY & (textureHeight - 1)) * textureWidth + ((int)textureX & (textureWidth - 1)));
+                red = textures[textureCode][pixelPos] * ceilShade;
+                green = textures[textureCode][pixelPos + 1] * ceilShade;
+                blue = textures[textureCode][pixelPos + 2] * ceilShade;
 
-            pixelPos = 3 * (((int)textureY & (textureHeight - 1)) * textureWidth + ((int)textureX & (textureWidth - 1)));
-            red = textures[textureCode][pixelPos] * ceilShade;
-            green = textures[textureCode][pixelPos + 1] * ceilShade;
-            blue = textures[textureCode][pixelPos + 2] * ceilShade;
-
-            glColor3ub(red, green, blue);
-            glVertex2i(r * wallWidth, viewHeight - y);
+                glColor3ub(red, green, blue);
+                glVertex2i(r * wallWidth, viewHeight - y);
+            }
         }
         glEnd();
 
         // Increment degree
         ra = fixAngle(ra - rayAngleDelta);
     }
+}
+
+void drawSky() {
+    glPointSize(wallWidth);
+    glBegin(GL_POINTS);
+    for (int y = 0; y < skyHeight / 2; y++) {
+        for (int x = 0; x <= skyWidth; x++) {
+            int xoff = (int)pAngle * 2 - x;
+            if (xoff < 0) {
+                xoff += skyWidth;
+            }
+            xoff %= skyWidth;
+
+            float pixelPos = 3 * (y * skyWidth + xoff);
+            float red = skyTexture[pixelPos];
+            float green = skyTexture[pixelPos + 1];
+            float blue = skyTexture[pixelPos + 2];
+
+            glColor3ub(red, green, blue);
+            glVertex2i(x * wallWidth, y * wallWidth);
+        }
+    }
+    glEnd();
 }
 
 // Might wanna revisit in the future
@@ -421,6 +445,7 @@ void display() {
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
     // drawViewBorder();
     // drawMap();
+    drawSky();
     drawRays(numberOfRays);
     // drawPlayer();
     glutSwapBuffers();

@@ -1,5 +1,4 @@
 #include <algorithm>
-#include <array>
 #include <filesystem>
 #include <fstream>
 #include <sstream>
@@ -17,6 +16,7 @@ namespace fs = std::filesystem;
 const fs::path texturesDir{"textures"};
 
 map<int, array<int, 3 * textureHeight * textureWidth>> textures;
+array<int, 3 * skyHeight * skyWidth> skyTexture;
 
 // Load textures from "textures" directoy. Textures must be named as "<texture_code>_<texture-name>" and are
 // in a 3x32x32 format 3 is for RGB
@@ -50,16 +50,28 @@ void loadTextures() {
         for (auto i = 0; i < textureStr.length(); i++) {
             if (textureStr[i] == ' ' || textureStr[i] == '\n' || textureStr[i] == ',') {
                 if (texturePixel != "") {
-                    texture[texturePos] = stoi(texturePixel);
+                    auto pixel = stoi(texturePixel);
+                    if (textureCodeStr == skyTextureCode) {
+                        skyTexture[texturePos] = pixel;
+                    } else {
+                        texture[texturePos] = pixel;
+                    }
                     texturePixel = "";
                     texturePos++;
                 }
                 continue;
             }
 
-            if (texturePos >= 3 * textureWidth * textureHeight) {
+            auto textureSize = textureCodeStr == skyTextureCode ? skyWidth * skyHeight : textureWidth * textureHeight;
+
+            if (texturePos >= 3 * textureSize) {
                 if (texturePixel != "") {
-                    texture[texturePos] = stoi(texturePixel);
+                    auto pixel = stoi(texturePixel);
+                    if (textureCodeStr == skyTextureCode) {
+                        skyTexture[texturePos] = pixel;
+                    } else {
+                        texture[texturePos] = pixel;
+                    }
                     texturePixel = "";
                 }
                 break;
