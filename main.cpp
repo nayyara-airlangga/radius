@@ -15,6 +15,8 @@
 #define tileSize 64
 #define mvSpeed 0.15
 #define rotSpeed 0.175
+#define floorShade 0.7
+#define ceilShade 0.7
 
 typedef struct {
     bool w, a, s, d;
@@ -31,6 +33,26 @@ int mapWalls[mapSize] =
      1, 0, 0, 0, 0, 2, 0, 1,
      1, 0, 0, 0, 0, 0, 0, 1,
      1, 2, 2, 2, 2, 2, 2, 1};
+
+int mapFloors[mapSize] = //
+    {0, 0, 0, 0, 0, 0, 0, 0,
+     0, 2, 2, 1, 1, 1, 2, 0,
+     0, 2, 2, 1, 2, 2, 2, 0,
+     0, 2, 2, 1, 1, 2, 2, 0,
+     0, 2, 2, 1, 1, 2, 2, 0,
+     0, 1, 1, 1, 1, 1, 1, 0,
+     0, 1, 1, 1, 1, 1, 1, 0,
+     0, 0, 0, 0, 0, 0, 0, 0};
+
+int mapCeilings[mapSize] =
+    {0, 0, 0, 0, 0, 0, 0, 0,
+     0, 3, 3, 3, 3, 3, 3, 0,
+     0, 3, 2, 2, 2, 2, 3, 0,
+     0, 3, 2, 0, 1, 2, 3, 0,
+     0, 3, 2, 1, 0, 2, 3, 0,
+     0, 3, 2, 2, 2, 2, 3, 0,
+     0, 3, 3, 3, 3, 3, 3, 0,
+     0, 0, 0, 0, 0, 0, 0, 0};
 
 float playerX, playerY;
 float pDeltaX, pDeltaY;
@@ -218,6 +240,39 @@ void drawRays(int rays) {
             glVertex2i(r * wallWidth + screenWidth / 2 + 20, y + lineOff + viewHeight / 4);
 
             textureY += textureYStep;
+        }
+        glEnd();
+
+        glPointSize(wallWidth);
+        glBegin(GL_POINTS);
+        for (int y = lineHeight + lineOff; y < viewHeight; y++) {
+            // Draw floors
+            float deltaY = y - viewHeight / 2;
+            float floorRad = degToRad(ra);
+            float floorRaX = cos(degToRad(fixAngle(pAngle - ra)));
+
+            textureX = playerX / 2 + cos(floorRad) * (viewHeight / 2) * textureWidth / deltaY / floorRaX;
+            textureY = playerY / 2 - sin(floorRad) * (viewHeight / 2) * textureHeight / deltaY / floorRaX;
+            textureCode = mapFloors[((int)textureY / textureHeight * mapWidth + (int)textureX / textureWidth)];
+
+            float pixelPos = 3 * (((int)textureY & (textureHeight - 1)) * textureWidth + ((int)textureX & (textureWidth - 1)));
+            float red = textures[textureCode][pixelPos] * floorShade;
+            float green = textures[textureCode][pixelPos + 1] * floorShade;
+            float blue = textures[textureCode][pixelPos + 2] * floorShade;
+
+            glColor3ub(red, green, blue);
+            glVertex2i(r * wallWidth + screenWidth / 2 + 20, y + viewHeight / 4);
+
+            // Draw ceilings
+            textureCode = mapCeilings[((int)textureY / textureHeight * mapWidth + (int)textureX / textureWidth)];
+
+            pixelPos = 3 * (((int)textureY & (textureHeight - 1)) * textureWidth + ((int)textureX & (textureWidth - 1)));
+            red = textures[textureCode][pixelPos] * ceilShade;
+            green = textures[textureCode][pixelPos + 1] * ceilShade;
+            blue = textures[textureCode][pixelPos + 2] * ceilShade;
+
+            glColor3ub(red, green, blue);
+            glVertex2i(r * wallWidth + screenWidth / 2 + 20, viewHeight - y + viewHeight / 4);
         }
         glEnd();
 
