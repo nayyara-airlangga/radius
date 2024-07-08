@@ -16,9 +16,10 @@ namespace fs = std::filesystem;
 
 const fs::path texturesDir{"textures"};
 
-map<int, array<int, textureHeight * textureWidth>> textures;
+map<int, array<int, 3 * textureHeight * textureWidth>> textures;
 
-// Load textures from "textures" directoy. Textures must be named as "<texture_code>_<texture-name>"
+// Load textures from "textures" directoy. Textures must be named as "<texture_code>_<texture-name>" and are
+// in a 3x32x32 format 3 is for RGB
 void loadTextures() {
     // Loop through all textures in textures directory
     for (auto const &textureFile : fs::directory_iterator(texturesDir)) {
@@ -35,21 +36,36 @@ void loadTextures() {
         out << fileStream.rdbuf();
         string textureStr = out.str();
 
-        array<int, textureWidth * textureHeight> texture;
+        // Strip ppm metadata
+        textureStr = textureStr.erase(0, textureStr.substr(0, textureStr.find_first_of("\n") + 1).length());
+        textureStr = textureStr.erase(0, textureStr.substr(0, textureStr.find_first_of("\n") + 1).length());
+
+        array<int, 3 * textureWidth * textureHeight> texture;
         int texturePos = 0;
 
+        // Store texture pixel for parsing multi-digits
+        string texturePixel = "";
+
         // Add characters to the texture array
-        for (const auto ch : textureStr) {
-            if (ch == ' ' || ch == '\n' || ch == ',') {
+        for (auto i = 0; i < textureStr.length(); i++) {
+            if (textureStr[i] == ' ' || textureStr[i] == '\n' || textureStr[i] == ',') {
+                if (texturePixel != "") {
+                    texture[texturePos] = stoi(texturePixel);
+                    texturePixel = "";
+                    texturePos++;
+                }
                 continue;
             }
 
-            if (texturePos >= textureWidth * textureHeight) {
+            if (texturePos >= 3 * textureWidth * textureHeight) {
+                if (texturePixel != "") {
+                    texture[texturePos] = stoi(texturePixel);
+                    texturePixel = "";
+                }
                 break;
             }
 
-            texture[texturePos] = ch - '0';
-            texturePos++;
+            texturePixel += textureStr[i];
         }
 
         // Insert texture to array

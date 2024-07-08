@@ -205,13 +205,16 @@ void drawRays(int rays) {
             }
         }
 
-        glLineWidth(wallWidth);
+        glPointSize(wallWidth);
         glBegin(GL_POINTS);
 
         for (int y = 0; y < lineHeight; y++) {
-            float color = textures[textureCode][(int)textureY * textureWidth + (int)textureX] * shade;
+            float pixelPos = 3 * ((int)textureY * textureWidth + (int)textureX);
+            float red = textures[textureCode][pixelPos] * shade;
+            float green = textures[textureCode][pixelPos + 1] * shade;
+            float blue = textures[textureCode][pixelPos + 2] * shade;
 
-            glColor3f(color, color, color);
+            glColor3ub(red, green, blue);
             glVertex2i(r * wallWidth + screenWidth / 2 + 20, y + lineOff + viewHeight / 4);
 
             textureY += textureYStep;
