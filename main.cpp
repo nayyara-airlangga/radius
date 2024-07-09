@@ -11,7 +11,7 @@
 #define wallWidth 8
 #define mapWidth 16
 #define mapHeight 16
-#define mapSize 256
+#define mapSize (mapWidth * mapHeight)
 #define tileSize 64
 #define mvSpeed 0.175
 #define rotSpeed 0.175
